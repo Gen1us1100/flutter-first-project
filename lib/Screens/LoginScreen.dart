@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../constants.dart'as constant;
 import '../Components/textfield.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+
+import 'MainScreen.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -9,8 +13,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late String email,password;
+  int myvar = 0;
+
   @override
   Widget build(BuildContext context) {
+    final _auth = FirebaseAuth.instance;
     return  Scaffold(
       backgroundColor: constant.primaryColor,
       body: Column(
@@ -23,8 +31,18 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Image.network('https://ps.w.org/login-customizer/assets/icon-256x256.png?rev=2455454',
             ),
           ),
-          textfield(text: "E-mail",isPassword: false),
-          textfield(text: 'Password',isPassword: true),
+          textfield(text: "E-mail",
+            isPassword: false,
+            onchanged: (value){
+            email = value;
+            },
+          ),
+          textfield(text: 'Password',
+              isPassword: true,
+            onchanged: (value){
+            password = value;
+            },
+          ),
           ClipRRect(
             borderRadius: BorderRadius.circular(25.0),
             child: Container(
@@ -41,7 +59,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       )
                     )
                   ),
-                  onPressed: (){}, child: Text('Login',
+                  onPressed: () async {
+                    try{
+                    final newUser =
+                      await _auth.signInWithEmailAndPassword(
+                      email :email, password: password
+                    );
+                    if(newUser.user != null && myvar != 0){
+                      Navigator.pushReplacement(
+                          context, MaterialPageRoute(builder: (context)=>MainScreen()));
+                    }}
+                    catch(e){
+                      debugPrint('$e');
+                    }
+                  }, child: Text('Login',
               style: TextStyle(
                 fontSize: 30,
                 color: constant.primaryColor
